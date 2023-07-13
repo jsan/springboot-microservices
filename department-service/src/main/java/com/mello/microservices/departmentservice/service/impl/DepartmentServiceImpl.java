@@ -26,9 +26,24 @@ public class DepartmentServiceImpl implements DepartmentService
     }
 
     @Override
-    public DepartmentDto getDptoById(Long id)
+    public DepartmentDto update(Long id, DepartmentDto departmentDto)
+    {
+        // TODO Validate ID with FindById throw exception
+        departmentDto.setId(id);
+        Department department = DepartmentMapper.MAPPER.mapToDepartment(departmentDto);
+        return DepartmentMapper.MAPPER.mapToDepartmentDto(departmentRepo.save(department));
+    }
+
+    @Override
+    public DepartmentDto getDptById(Long id)
     {
         return departmentRepo.findById(id).map(DepartmentMapper.MAPPER::mapToDepartmentDto).orElse(null);
+    }
+
+    @Override
+    public DepartmentDto getDptByDepartmentCode(String departmentCode)
+    {
+        return DepartmentMapper.MAPPER.mapToDepartmentDto(departmentRepo.findDepartmentByDepartmentCode(departmentCode));
     }
 
     @Override
