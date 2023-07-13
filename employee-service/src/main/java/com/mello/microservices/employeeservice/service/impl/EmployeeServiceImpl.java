@@ -6,7 +6,7 @@ import com.mello.microservices.employeeservice.dto.EmployeeDto;
 import com.mello.microservices.employeeservice.entity.Employee;
 import com.mello.microservices.employeeservice.mapper.EmployeeMapper;
 import com.mello.microservices.employeeservice.repository.EmployeeRepository;
-import com.mello.microservices.employeeservice.service.APIClient;
+import com.mello.microservices.employeeservice.service.OpenFeignAPIClient;
 import com.mello.microservices.employeeservice.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class EmployeeServiceImpl implements EmployeeService
     private WebClient webClient;
 */
 
-    private APIClient apiClient;
+    private OpenFeignAPIClient apiClient;
 
     @Override
     public EmployeeDto save(EmployeeDto employeeDto)
