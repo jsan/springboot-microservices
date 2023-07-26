@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="api-gateway" />
         <module name="config-server" />
+        <module name="organization-service" />
         <module name="service-registry" />
       </profile>
       <profile name="Annotation profile for employee-service" enabled="true">
@@ -25,7 +26,10 @@
         <module name="employee-service" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="17" />
+    <bytecodeTargetLevel target="17">
+      <module name="employee-service (1)" target="17" />
+      <module name="employee-service (2)" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -33,6 +37,9 @@
       <module name="config-server" options="-parameters" />
       <module name="department-service" options="-parameters" />
       <module name="employee-service" options="-parameters" />
+      <module name="employee-service (1)" options="-parameters" />
+      <module name="employee-service (2)" options="-parameters" />
+      <module name="organization-service" options="-parameters" />
       <module name="service-registry" options="-parameters" />
     </option>
   </component>
