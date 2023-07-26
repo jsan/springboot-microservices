@@ -2,17 +2,24 @@ package com.mello.microservices.employeeservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
+@EnableFeignClients
 public class EmployeeServiceApplication
 {
+/*  Using OpenFeign for reaching Departments endpoint instead
 	@Bean
-	public RestTemplate restTemplate()
+	public RestTemplate rest()
 	{
 		return new RestTemplate();
 	}
+
+	@Bean
+	public WebClient webClient(){
+		return WebClient.builder().build();
+	}
+*/
 
 	public static void main(String[] args)
 	{

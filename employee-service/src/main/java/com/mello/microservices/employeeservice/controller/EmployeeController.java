@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("employees")
 @AllArgsConstructor
+@RequestMapping("employees")
 public class EmployeeController
 {
     private EmployeeService employeeService;
@@ -23,8 +23,15 @@ public class EmployeeController
         return new ResponseEntity(employeeService.save(employeeDto), HttpStatus.CREATED);
     }
 
+    @PutMapping({"{id}"})
+    public ResponseEntity<EmployeeDto> update(@PathVariable Long id, @RequestBody EmployeeDto employeeDto)
+    {
+        return ResponseEntity.ok(employeeService.update(id, employeeDto));
+    }
+
     @GetMapping("all")
-    public ResponseEntity<List<EmployeeDto>> listAll(){
+    public ResponseEntity<List<EmployeeDto>> listAll()
+    {
         return ResponseEntity.ok(employeeService.listAll());
     }
 
@@ -41,3 +48,4 @@ public class EmployeeController
     }
 
 }
+
