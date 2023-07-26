@@ -31,6 +31,7 @@ public class DepartmentController
     @GetMapping("{id}")
     public ResponseEntity<DepartmentDto> getDptById(@PathVariable Long id)
     {
+
         return new ResponseEntity<>(departmentService.getDptById(id), HttpStatus.OK);
     }
 

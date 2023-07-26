@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("employees")
 @AllArgsConstructor
+@RequestMapping("employees")
 public class EmployeeController
 {
     private EmployeeService employeeService;
@@ -48,3 +48,4 @@ public class EmployeeController
     }
 
 }
+
