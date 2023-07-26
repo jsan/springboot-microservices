@@ -8,8 +8,13 @@ import com.mello.microservices.employeeservice.mapper.EmployeeMapper;
 import com.mello.microservices.employeeservice.repository.EmployeeRepository;
 import com.mello.microservices.employeeservice.service.OpenFeignAPIClient;
 import com.mello.microservices.employeeservice.service.EmployeeService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,10 +23,13 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmployeeServiceImpl.class);
+
     private EmployeeRepository employeeRepository;
 
 /*  Not used:
     private RestTemplate restTemplate;
+
     private WebClient webClient;
 */
 
@@ -44,10 +52,13 @@ public class EmployeeServiceImpl implements EmployeeService
     }
 
     @Override
+    // @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+    @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     public APIResponseDto  getEmployeeById(Long id)
     {
         // TODO add exception (orElseThrow) case employee not found (and also on All other methods of this class)
 
+        LOGGER.warn("Inside getEmployeeById method");
         EmployeeDto employeeDto = EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.findById(id).get());
 
 /*      RestTemplate:
@@ -55,18 +66,28 @@ public class EmployeeServiceImpl implements EmployeeService
                 restTemplate.getForEntity("http://localhost:8080/departments/dpt/" + employeeDto.getDepartmentCode(), DepartmentDto.class);
 
         DepartmentDto departmentDto = departmentDtoCall.getBody();
-
-        WebClient(WebFlux):
-        DepartmentDto departmentDto = webClient.get()
-                .uri("http://localhost:8080/departments/dpt/" + employeeDto.getDepartmentCode())
-                .retrieve()
-                .bodyToMono(DepartmentDto.class).block();
 */
+        // WebClient(WebFlux):
+        // DepartmentDto departmentDto = webClient.get()
+        //         .uri("http://localhost:8080/departments/dpt/" + employeeDto.getDepartmentCode())
+        //         .retrieve()
+        //         .bodyToMono(DepartmentDto.class).block();
+
 
         DepartmentDto departmentDto = apiClient.getDptByDepartmentCode(employeeDto.getDepartmentCode());
 
         return new APIResponseDto(employeeDto, departmentDto);
 
+    }
+
+    public APIResponseDto  getDefaultDepartment(Long id, Exception e){
+
+        LOGGER.warn("Inside getDefaultDepartment method");
+
+        EmployeeDto employeeDto = EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.findById(id).get());
+        DepartmentDto defaultDepartmentDto = new DepartmentDto(1L,"Default department name","Default department desc","Default department code");
+
+        return new APIResponseDto(employeeDto, defaultDepartmentDto);
     }
 
     @Override
