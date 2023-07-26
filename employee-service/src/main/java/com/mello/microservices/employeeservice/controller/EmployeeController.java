@@ -29,7 +29,7 @@ public class EmployeeController
         return ResponseEntity.ok(employeeService.update(id, employeeDto));
     }
 
-    @GetMapping("all")
+    @GetMapping
     public ResponseEntity<List<EmployeeDto>> listAll()
     {
         return ResponseEntity.ok(employeeService.listAll());

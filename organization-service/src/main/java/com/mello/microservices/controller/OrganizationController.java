@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("organizations")
 @AllArgsConstructor
@@ -26,6 +28,12 @@ public class OrganizationController {
     public ResponseEntity<OrganizationDto> getOrganization(@PathVariable("code") String organizationCode){
         OrganizationDto organizationDto = organizationService.getOrganizationByCode(organizationCode);
         return ResponseEntity.ok(organizationDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrganizationDto>> getAllOrganizations(){
+        return new ResponseEntity<>(organizationService.getAllOrganizations(), HttpStatus.OK);
+
     }
 
 }
