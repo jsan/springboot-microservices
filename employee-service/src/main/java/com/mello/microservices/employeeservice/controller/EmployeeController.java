@@ -2,6 +2,7 @@ package com.mello.microservices.employeeservice.controller;
 
 import com.mello.microservices.employeeservice.dto.APIResponseDto;
 import com.mello.microservices.employeeservice.dto.EmployeeDto;
+import com.mello.microservices.employeeservice.dto.Employees;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +31,10 @@ public class EmployeeController
     }
 
     @GetMapping
-    public ResponseEntity<List<EmployeeDto>> listAll()
+    public ResponseEntity<Employees> listAll()
     {
-        return ResponseEntity.ok(employeeService.listAll());
+        Employees employees = new Employees(employeeService.listAll());
+        return ResponseEntity.ok(employees);
     }
 
     @GetMapping("{id}")
