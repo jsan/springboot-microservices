@@ -13,7 +13,9 @@ public class MessagePropertiesController
     private String message;
 
     @GetMapping("message")
-    public String getMessage (){
+    public String getMessage ()
+    {
         return message;
+
     }
 }

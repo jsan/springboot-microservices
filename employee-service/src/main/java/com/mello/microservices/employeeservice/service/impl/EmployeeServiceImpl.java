@@ -10,6 +10,7 @@ import com.mello.microservices.employeeservice.repository.EmployeeRepository;
 import com.mello.microservices.employeeservice.service.client.DepartmentAPIClient;
 import com.mello.microservices.employeeservice.service.EmployeeService;
 import com.mello.microservices.employeeservice.service.client.OrganizationAPIClient;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -54,11 +55,11 @@ public class EmployeeServiceImpl implements EmployeeService
     }
 
     @Override
-    // @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
-    @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+    // @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     public APIResponseDto  getEmployeeById(Long id)
     {
-        // TODO add exception (orElseThrow) case employee not found (and also on All other methods of this class)
+        // TODO add exception handling (orElseThrow) case employee not found (and also on All other methods of this class)
 
         LOGGER.warn("Inside getEmployeeById method");
         EmployeeDto employeeDto = EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.findById(id).get());
@@ -75,7 +76,7 @@ public class EmployeeServiceImpl implements EmployeeService
         //         .retrieve()
         //         .bodyToMono(OrganizationDto.class).block();
 
-        // Http FeignClient call:
+        // Http FeignClient API call:
         DepartmentDto departmentDto = departmentAPIClient.getDptByDepartmentCode(employeeDto.getDepartmentCode());
 
         OrganizationDto organizationDto = getOrganization(employeeDto.getOrganizationCode());
@@ -87,8 +88,16 @@ public class EmployeeServiceImpl implements EmployeeService
 
         LOGGER.warn("Inside getDefaultDepartment method");
 
+        // Employee
         EmployeeDto employeeDto = EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.findById(id).get());
-        DepartmentDto defaultDepartmentDto = new DepartmentDto(1L,"Default department name","Default department desc","Default department code");
+
+        // Department
+        DepartmentDto defaultDepartmentDto = new DepartmentDto(1L,
+                "Default department name",
+                "Default department desc",
+                "Default department code");
+
+        // Organization
         OrganizationDto organizationDto = getOrganization(employeeDto.getOrganizationCode());
 
         return new APIResponseDto(employeeDto, defaultDepartmentDto, organizationDto);
