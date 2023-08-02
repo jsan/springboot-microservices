@@ -1,13 +1,16 @@
 package com.mello.microservices.employeeservice.controller;
 
 import com.mello.microservices.employeeservice.dto.APIResponseDto;
+import com.mello.microservices.employeeservice.dto.Employee;
 import com.mello.microservices.employeeservice.dto.EmployeeDto;
+import com.mello.microservices.employeeservice.dto.Employees;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.mello.microservices.employeeservice.service.EmployeeService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,16 +32,20 @@ public class EmployeeController
         return ResponseEntity.ok(employeeService.update(id, employeeDto));
     }
 
-    @GetMapping("all")
-    public ResponseEntity<List<EmployeeDto>> listAll()
+    @GetMapping
+    public ResponseEntity<Employees> listAll()
     {
-        return ResponseEntity.ok(employeeService.listAll());
+        Employees employees = new Employees(employeeService.listAll());
+        return ResponseEntity.ok(employees);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<APIResponseDto> getEmployeeById(@PathVariable Long id)
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) throws Exception
     {
-        return new ResponseEntity<>(employeeService.getEmployeeById(id), HttpStatus.OK);
+        List<APIResponseDto> list = new  ArrayList<>();
+        list.add(employeeService.getEmployeeById(id));
+
+        return ResponseEntity.ok(new Employee(list));
     }
 
     @DeleteMapping("{id}")
