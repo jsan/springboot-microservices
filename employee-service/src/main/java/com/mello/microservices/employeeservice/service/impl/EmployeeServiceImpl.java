@@ -55,8 +55,8 @@ public class EmployeeServiceImpl implements EmployeeService
     }
 
     @Override
-    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     // @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     public APIResponseDto  getEmployeeById(Long id)
     {
         // TODO add exception handling (orElseThrow) case employee not found (and also on All other methods of this class)
@@ -79,6 +79,7 @@ public class EmployeeServiceImpl implements EmployeeService
         // Http FeignClient API call:
         DepartmentDto departmentDto = departmentAPIClient.getDptByDepartmentCode(employeeDto.getDepartmentCode());
 
+        // Http FeignClient API call:
         OrganizationDto organizationDto = getOrganization(employeeDto.getOrganizationCode());
 
         return new APIResponseDto(employeeDto, departmentDto, organizationDto);

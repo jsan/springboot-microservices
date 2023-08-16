@@ -1,6 +1,7 @@
 package com.mello.microservices.departmentservice.controller;
 
 import com.mello.microservices.departmentservice.dto.DepartmentDto;
+import com.mello.microservices.departmentservice.dto.DepartmentsDto;
 import com.mello.microservices.departmentservice.service.DepartmentService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,9 +43,9 @@ public class DepartmentController
     }
 
     @GetMapping("all")
-    public ResponseEntity<List<DepartmentDto>> listAll()
+    public ResponseEntity<DepartmentsDto> listAll()
     {
-        return ResponseEntity.ok(departmentService.listAll());
+        return ResponseEntity.ok(new DepartmentsDto(departmentService.listAll()));
     }
 
     @DeleteMapping("{id}")

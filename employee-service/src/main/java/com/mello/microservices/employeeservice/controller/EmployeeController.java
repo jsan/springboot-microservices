@@ -26,12 +26,14 @@ public class EmployeeController
         return new ResponseEntity(employeeService.save(employeeDto), HttpStatus.CREATED);
     }
 
+    @CrossOrigin
     @PutMapping({"{id}"})
     public ResponseEntity<EmployeeDto> update(@PathVariable Long id, @RequestBody EmployeeDto employeeDto)
     {
         return ResponseEntity.ok(employeeService.update(id, employeeDto));
     }
 
+    @CrossOrigin
     @GetMapping
     public ResponseEntity<Employees> listAll()
     {
