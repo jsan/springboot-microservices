@@ -42,6 +42,7 @@ public class DepartmentController
         return new ResponseEntity<>(departmentService.getDptByDepartmentCode(departmentCode), HttpStatus.OK);
     }
 
+    @CrossOrigin
     @GetMapping("all")
     public ResponseEntity<DepartmentsDto> listAll()
     {

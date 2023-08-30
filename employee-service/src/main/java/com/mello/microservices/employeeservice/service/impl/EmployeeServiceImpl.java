@@ -1,24 +1,21 @@
 package com.mello.microservices.employeeservice.service.impl;
 
-import com.mello.microservices.employeeservice.dto.APIResponseDto;
-import com.mello.microservices.employeeservice.dto.DepartmentDto;
-import com.mello.microservices.employeeservice.dto.EmployeeDto;
-import com.mello.microservices.employeeservice.dto.OrganizationDto;
+import com.mello.microservices.employeeservice.dto.*;
 import com.mello.microservices.employeeservice.entity.Employee;
+import com.mello.microservices.employeeservice.kafka.KafkaEmployeeProducer;
 import com.mello.microservices.employeeservice.mapper.EmployeeMapper;
 import com.mello.microservices.employeeservice.repository.EmployeeRepository;
 import com.mello.microservices.employeeservice.service.client.DepartmentAPIClient;
 import com.mello.microservices.employeeservice.service.EmployeeService;
 import com.mello.microservices.employeeservice.service.client.OrganizationAPIClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,18 +23,15 @@ import java.util.stream.Collectors;
 public class EmployeeServiceImpl implements EmployeeService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmployeeServiceImpl.class);
-
     private EmployeeRepository employeeRepository;
+    private DepartmentAPIClient departmentAPIClient;
+    private OrganizationAPIClient organizationAPIClient;
+    private KafkaEmployeeProducer kafkaEmployeeProducer;
 
 /*  Not used:
     private RestTemplate restTemplate;
-
     private WebClient webClient;
 */
-
-    private DepartmentAPIClient departmentAPIClient;
-    private OrganizationAPIClient organizationAPIClient;
-
     @Override
     public EmployeeDto save(EmployeeDto employeeDto)
     {
@@ -46,12 +40,34 @@ public class EmployeeServiceImpl implements EmployeeService
     }
 
     @Override
-    public EmployeeDto update(Long id, EmployeeDto employeeDto)
+    public Boolean update(Long id, EmployeeDto employeeDto)
     {
         // TODO Validate ID with FindById throw exception
-        employeeDto.setId(id);
-        Employee employee = EmployeeMapper.MAPPER.mapToEmployee(employeeDto);
-        return EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.save(employee));
+
+        Optional<Employee> emp = employeeRepository.findById(id);
+
+        if (emp.isPresent())
+        {
+            employeeDto.setId(emp.get().getId());
+
+            sendKafkaMessage(employeeDto);
+
+            Employee employee = EmployeeMapper.MAPPER.mapToEmployee(employeeDto);
+            EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.save(employee));
+
+            return true;
+        }
+        return false;
+    }
+
+    private void sendKafkaMessage(EmployeeDto employeeDto)
+    {
+        EmployeeEvent employeeEvent = new EmployeeEvent();
+        employeeEvent.setStatus("PENDENT");
+        employeeEvent.setMessage("Employee Pending");
+        employeeEvent.setEmployeeDto(employeeDto);
+
+        kafkaEmployeeProducer.sendMessage(employeeEvent);
     }
 
     @Override
@@ -62,7 +78,8 @@ public class EmployeeServiceImpl implements EmployeeService
         // TODO add exception handling (orElseThrow) case employee not found (and also on All other methods of this class)
 
         LOGGER.warn("Inside getEmployeeById method");
-        EmployeeDto employeeDto = EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.findById(id).get());
+        Employee emp = employeeRepository.findById(id).orElseThrow();
+        EmployeeDto employeeDto = EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.findById(id).orElseThrow());
 
         // RestTemplate call:
         // ResponseEntity<DepartmentDto> departmentDtoCall =
