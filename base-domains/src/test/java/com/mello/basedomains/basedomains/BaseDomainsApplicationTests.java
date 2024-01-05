@@ -1,10 +1,10 @@
-package net.javaguides.organizationservice;
+package com.mello.basedomains.basedomains;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class OrganizationServiceApplicationTests {
+class BaseDomainsApplicationTests {
 
 	@Test
 	void contextLoads() {
