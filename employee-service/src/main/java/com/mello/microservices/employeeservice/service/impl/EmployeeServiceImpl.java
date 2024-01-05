@@ -12,8 +12,12 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LoggerGroup;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
+import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService
 {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EmployeeServiceImpl.class);
     private EmployeeRepository employeeRepository;
     private DepartmentAPIClient departmentAPIClient;
@@ -33,9 +38,13 @@ public class EmployeeServiceImpl implements EmployeeService
     private WebClient webClient;
 */
     @Override
-    public EmployeeDto save(EmployeeDto employeeDto)
+    public EmployeeDto  save(EmployeeDto employeeDto)
     {
+
         Employee employee = employeeRepository.save(EmployeeMapper.MAPPER.mapToEmployee(employeeDto));
+
+        sendKafkaMessage("CREATE", employeeDto);
+
         return EmployeeMapper.MAPPER.mapToEmployeeDto(employee);
     }
 
@@ -50,7 +59,7 @@ public class EmployeeServiceImpl implements EmployeeService
         {
             employeeDto.setId(emp.get().getId());
 
-            sendKafkaMessage(employeeDto);
+            sendKafkaMessage("UPDATE", employeeDto);
 
             Employee employee = EmployeeMapper.MAPPER.mapToEmployee(employeeDto);
             EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.save(employee));
@@ -58,16 +67,6 @@ public class EmployeeServiceImpl implements EmployeeService
             return true;
         }
         return false;
-    }
-
-    private void sendKafkaMessage(EmployeeDto employeeDto)
-    {
-        EmployeeEvent employeeEvent = new EmployeeEvent();
-        employeeEvent.setStatus("PENDENT");
-        employeeEvent.setMessage("Employee Pending");
-        employeeEvent.setEmployeeDto(employeeDto);
-
-        kafkaEmployeeProducer.sendMessage(employeeEvent);
     }
 
     @Override
@@ -132,6 +131,11 @@ public class EmployeeServiceImpl implements EmployeeService
     @Override
     public void delete(Long id)
     {
+        // Employee
+        EmployeeDto employeeDto = EmployeeMapper.MAPPER.mapToEmployeeDto(employeeRepository.findById(id).get());
+
+        sendKafkaMessage("DELETE", employeeDto);
+
         employeeRepository.deleteById(id);
     }
 
@@ -139,4 +143,15 @@ public class EmployeeServiceImpl implements EmployeeService
     {
         return  organizationAPIClient.getOrganization(organizationCode);
     }
+
+    private void sendKafkaMessage(String operation, EmployeeDto employeeDto)
+    {
+        EmployeeEvent employeeEvent = new EmployeeEvent();
+
+        employeeEvent.setStatus(operation);
+        employeeEvent.setMessage("Employee changed");
+        employeeEvent.setEmployeeDto(employeeDto);
+        kafkaEmployeeProducer.sendMessage(employeeEvent);
+    }
+
 }

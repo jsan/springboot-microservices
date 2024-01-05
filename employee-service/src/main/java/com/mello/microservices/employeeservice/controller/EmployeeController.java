@@ -20,7 +20,7 @@ public class EmployeeController
     private EmployeeService employeeService;
 
     @CrossOrigin
-    @PostMapping
+    @PutMapping
     public ResponseEntity<EmployeeDto> save (@RequestBody EmployeeDto employeeDto)
     {
         return new ResponseEntity(employeeService.save(employeeDto), HttpStatus.CREATED);

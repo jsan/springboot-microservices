@@ -1,5 +1,6 @@
 package com.mello.microservices.controller;
 
+import com.adyen.service.exception.ApiException;
 import com.mello.microservices.dto.OrganizationDto;
 import com.mello.microservices.dto.OrganizationsDto;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -37,5 +39,13 @@ public class OrganizationController {
     public ResponseEntity<OrganizationsDto> getAllOrganizations(){
         return new ResponseEntity<>(new OrganizationsDto(organizationService.getAllOrganizations()), HttpStatus.OK);
     }
+
+    // @GetMapping("/payment")
+    // public ResponseEntity<String> sendPayment() throws IOException, ApiException
+    // {
+    //     System.out.println("foi");
+    //     organizationService.sendPayment();
+    //     return ResponseEntity.ok("Sent");
+    // }
 
 }
